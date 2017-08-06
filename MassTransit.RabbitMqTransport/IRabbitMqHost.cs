@@ -1,0 +1,63 @@
+﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.RabbitMqTransport
+{
+    using System;
+    using System.Threading.Tasks;
+    using GreenPipes;
+    using Integration;
+    using Util;
+
+
+    public interface IRabbitMqHost :
+        IHost
+    {
+        IConnectionCache ConnectionCache { get; }
+
+        RabbitMqHostSettings Settings { get; }
+
+        /// <summary>
+        /// The connection retry policy used for connecting to the host
+        /// </summary>
+        IRetryPolicy ConnectionRetryPolicy { get; }
+
+        /// <summary>
+        /// The supervisor for the host, which indicates when it's being stopped
+        /// </summary>
+        ITaskSupervisor Supervisor { get; }
+
+        /// <summary>
+        /// Return the send address for the exchange, which can be configured to include
+        /// additional settings.
+        /// </summary>
+        /// <param name="exchangeName">The exchange name</param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Uri GetSendAddress(string exchangeName, Action<IExchangeConfigurator> configure = null);
+
+        /// <summary>
+        /// Create a temporary receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
+
+        /// <summary>
+        /// Create a receive endpoint on the host, with a separate handle for stopping/removing the endpoint
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        Task<HostReceiveEndpointHandle> ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
+    }
+}
